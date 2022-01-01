@@ -3,10 +3,22 @@ class GameController < ApplicationController
   after_action :close_gtp
 
   def genmove
-    puts request
-    render json: {
-      response: @go.genmove(params[:color])
+    out = {
+      response: @go.genmove(params[:color]),
+      over: @go.over?
     }
+
+    if @go.over?
+      out[:final_status] = {
+        score: @go.final_score,
+        alive: @go.final_status_list("alive"),
+        dead:  @go.final_status_list("dead"),
+        white: @go.final_status_list("white_territory"),
+        black: @go.final_status_list("black_territory")
+      }
+    end
+
+    render json: out
   end
 
   def load_gtp
